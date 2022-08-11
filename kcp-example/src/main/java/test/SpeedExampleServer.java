@@ -72,6 +72,7 @@ public class SpeedExampleServer implements KcpListener {
     public void handleClose(Ukcp kcp) {
         System.out.println(Snmp.snmp.toString());
         Snmp.snmp  = new Snmp();
+        System.out.println("服务器断开");
         getDateAndTime();
     }
 

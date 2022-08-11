@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Calendar;
 
 /**
  * Created by JinMiao
@@ -30,14 +31,15 @@ public class SpeedExampleClient implements KcpListener {
         channelConfig.nodelay(true,30,2,true);
         channelConfig.setSndwnd(10000);
         channelConfig.setRcvwnd(10000);
-        channelConfig.setMtu(512);
+        channelConfig.setMtu(1400);
         channelConfig.setAckNoDelay(true);
         channelConfig.setConv(55);
         channelConfig.setiMessageExecutorPool(new DisruptorExecutorPool(Runtime.getRuntime().availableProcessors()/2));
         //channelConfig.setFecDataShardCount(10);
         //channelConfig.setFecParityShardCount(3);
         channelConfig.setCrc32Check(false);
-        channelConfig.setWriteBufferSize(channelConfig.getMtu()*300000);
+        channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
+
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
 
@@ -46,7 +48,7 @@ public class SpeedExampleClient implements KcpListener {
         kcpClient.connect(new InetSocketAddress("192.168.3.216",20004),channelConfig,speedExampleClient);
 
     }
-    private static final int messageSize = 5000;
+    private static final int messageSize = 1024;
     private long start = System.currentTimeMillis();
 
     @Override
@@ -116,7 +118,7 @@ public class SpeedExampleClient implements KcpListener {
                     e.printStackTrace();
                 }*/
 
-                byteBuf.writeBytes(new byte[1000]);
+                byteBuf.writeBytes(new byte[100]);
                 if(!ukcp.write(byteBuf)){
                     try {
                         Thread.sleep(2000);
@@ -143,5 +145,19 @@ public class SpeedExampleClient implements KcpListener {
 
     @Override
     public void handleClose(Ukcp kcp) {
+        //客户端只会不断发数据，没有断开这一说
+        System.out.println("客户端断开");
+        getDateAndTime();
+    }
+
+    public void getDateAndTime(){
+        Calendar cal=Calendar.getInstance();
+        int y=cal.get(Calendar.YEAR);
+        int m=cal.get(Calendar.MONTH)+1;
+        int d=cal.get(Calendar.DATE);
+        int h=cal.get(Calendar.HOUR_OF_DAY);
+        int mi=cal.get(Calendar.MINUTE);
+        int s=cal.get(Calendar.SECOND);
+        System.out.println("现在时刻是"+y+"年"+m+"月"+d+"日"+h+"时"+mi+"分"+s+"秒");
     }
 }
