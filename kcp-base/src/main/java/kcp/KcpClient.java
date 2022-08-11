@@ -140,7 +140,7 @@ public class KcpClient {
 
 
     public void stop() {
-        //System.out.println("关闭连接");
+        System.out.println("KcpClient中报出的关闭连接");
         channelManager.getAll().forEach(ukcp -> {
             try {
                 ukcp.close();

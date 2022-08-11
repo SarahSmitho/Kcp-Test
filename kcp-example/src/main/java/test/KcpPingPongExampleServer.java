@@ -34,6 +34,7 @@ public class KcpPingPongExampleServer implements KcpListener {
         channelConfig.setAckNoDelay(false);
         //channelConfig.setCrc32Check(true);
         channelConfig.setTimeoutMillis(10000);
+
         KcpServer kcpServer = new KcpServer();
         kcpServer.init(kcpRttExampleServer, channelConfig, 10001);
     }

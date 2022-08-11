@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
  * Created by JinMiao
  * 2018/10/24.
  */
+//Schedule 日程
 public class ScheduleTask implements ITask, Runnable, TimerTask {
 
     private final IMessageExecutor messageExecutor;

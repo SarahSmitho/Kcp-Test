@@ -8,6 +8,9 @@ import kcp.KcpServer;
 import kcp.Ukcp;
 import threadPool.disruptor.DisruptorExecutorPool;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 /**
  * 测试吞吐量
  * Created by JinMiao
@@ -19,8 +22,10 @@ public class SpeedExampleServer implements KcpListener {
         SpeedExampleServer speedExampleServer = new SpeedExampleServer();
         ChannelConfig channelConfig = new ChannelConfig();
         channelConfig.nodelay(true,30,2,true);
-        channelConfig.setSndwnd(2048);
-        channelConfig.setRcvwnd(2048);
+        //10000 比较稳定，在200MB到250之间，25000不稳定，波动很大有时候是在0，但是最大值也是200多
+        //20000也不行，有时候回事70，波动很大;15000也不行
+        channelConfig.setSndwnd(10000);
+        channelConfig.setRcvwnd(10000);
         channelConfig.setMtu(1400);
         channelConfig.setiMessageExecutorPool(new DisruptorExecutorPool(Runtime.getRuntime().availableProcessors()/2));
         //channelConfig.setFecDataShardCount(10);
@@ -51,6 +56,7 @@ public class SpeedExampleServer implements KcpListener {
             System.out.println("耗时 :" +(now-start) +" 接收数据: " +(Snmp.snmp.InBytes.doubleValue()/1024.0/1024.0)+"MB"+" 有效数据: "+inBytes/1024.0/1024.0+" MB");
             System.out.println(Snmp.snmp.BytesReceived.doubleValue()/1024.0/1024.0);
             System.out.println(Snmp.snmp.toString());
+            getDateAndTime();
             inBytes=0;
             Snmp.snmp = new Snmp();
             start=now;
@@ -66,5 +72,18 @@ public class SpeedExampleServer implements KcpListener {
     public void handleClose(Ukcp kcp) {
         System.out.println(Snmp.snmp.toString());
         Snmp.snmp  = new Snmp();
+        getDateAndTime();
     }
+
+    public void getDateAndTime(){
+        Calendar cal=Calendar.getInstance();
+        int y=cal.get(Calendar.YEAR);
+        int m=cal.get(Calendar.MONTH);
+        int d=cal.get(Calendar.DATE);
+        int h=cal.get(Calendar.HOUR_OF_DAY);
+        int mi=cal.get(Calendar.MINUTE);
+        int s=cal.get(Calendar.SECOND);
+        System.out.println("现在时刻是"+y+"年"+m+"月"+d+"日"+h+"时"+mi+"分"+s+"秒");
+    }
+
 }

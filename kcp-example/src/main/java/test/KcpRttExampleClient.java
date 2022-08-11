@@ -17,6 +17,7 @@ import java.util.concurrent.*;
  * Created by JinMiao
  * 2019-06-26.
  */
+//RTT : Round-Trip Time，数据往返时间，即发出消息到接收到对端消息应答之间的时间差。
 public class KcpRttExampleClient implements KcpListener {
 
     private final ByteBuf data;

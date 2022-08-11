@@ -33,6 +33,7 @@ public class KcpStringClient implements KcpListener {
 
         KcpStringClient kcpStringClient = new KcpStringClient();
 
+        //192.168.3.216
         kcpClient.connect(new InetSocketAddress("127.0.0.1", 10001), channelConfig, kcpStringClient);
     }
 
@@ -48,7 +49,11 @@ public class KcpStringClient implements KcpListener {
             byte[] bytes = msg.getBytes();
             ByteBuf byteBuf = ByteBufAllocator.DEFAULT.ioBuffer(bytes.length);
             byteBuf.writeBytes(bytes);
+
+            //writeBuffer.offer(byteBuf);  private final Queue<ByteBuf> writeBuffer;
+            //把信息写入ukcp的成员变量 writeBuffer中,消息是通过装进ukcp发送的
             ukcp.write(byteBuf);
+            //手动释放byteBuf
             byteBuf.release();
             now = System.currentTimeMillis();
             times++;

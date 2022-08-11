@@ -50,7 +50,8 @@ public class KcpStringServer implements KcpListener {
         byte[] bytes = new byte[buf.readableBytes()];
         buf.getBytes(buf.readerIndex(), bytes);
         System.out.println("收到消息: " + new String(bytes));
-        kcp.write(buf);
+        //这步搞不明白，怎么收的，数据是从buf里读出来的，buf是怎么接收的呢，这个函数不用kcp也可以直接工作
+        //kcp.write(buf);
         System.out.println("消息个数: " + i);
         end=System.currentTimeMillis();
         long gap=end-start;

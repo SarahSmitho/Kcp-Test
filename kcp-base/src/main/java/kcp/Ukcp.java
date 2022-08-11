@@ -365,7 +365,9 @@ public class Ukcp{
                 return --operand;
             });
             if(bufferSize==0){
-                //log.error("conv {} address {} writeBuffer is full",kcp.getConv(),((User)kcp.getUser()).getRemoteAddress());
+                //System.out.println("出问题了");
+                //conv 55 address /192.168.3.216:20004 writeBuffer is full   ????
+                log.error("conv {} address {} writeBuffer is full",kcp.getConv(),((User)kcp.getUser()).getRemoteAddress());
                 return false;
             }
         }
