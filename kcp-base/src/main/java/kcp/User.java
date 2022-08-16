@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
  * Created by JinMiao
  * 2018/11/2.
  */
+//User中只有三个成员变量，Channel信道对象、remoteAddress 远程IP、localAddress 本地IP
 public class User {
 
     private Channel channel;

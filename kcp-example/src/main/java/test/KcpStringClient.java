@@ -34,17 +34,18 @@ public class KcpStringClient implements KcpListener {
         KcpStringClient kcpStringClient = new KcpStringClient();
 
         //192.168.3.216
-        kcpClient.connect(new InetSocketAddress("127.0.0.1", 10001), channelConfig, kcpStringClient);
+        kcpClient.connect(new InetSocketAddress("192.168.3.217", 10001), channelConfig, kcpStringClient);
     }
 
     long start = System.currentTimeMillis();
 
     @Override
     public void onConnected(Ukcp ukcp) {
+        System.out.println("开始连接");
         long now = start;
         int times = 1;
         System.out.println("1秒钟发送的文本信息次数=" + times);
-        while (now - start <= 1000) {
+        while (now - start <= 10000) {
             String msg = "hello!!!!!11111111111111111111111111";
             byte[] bytes = msg.getBytes();
             ByteBuf byteBuf = ByteBufAllocator.DEFAULT.ioBuffer(bytes.length);
@@ -59,7 +60,7 @@ public class KcpStringClient implements KcpListener {
             times++;
             System.out.println("1秒钟发送的文本信息次数=" + times);
         }
-        System.out.println("1秒钟发送的文本信息次数=" + times);
+
     }
 
     @Override

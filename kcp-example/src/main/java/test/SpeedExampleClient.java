@@ -7,6 +7,8 @@ import kcp.ChannelConfig;
 import kcp.KcpClient;
 import kcp.KcpListener;
 import kcp.Ukcp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import threadPool.disruptor.DisruptorExecutorPool;
 
 import java.io.File;
@@ -21,34 +23,46 @@ import java.util.Calendar;
  * 2020/12/23.
  */
 public class SpeedExampleClient implements KcpListener {
-
+    private static final Logger logger = LoggerFactory.getLogger(SpeedExampleClient.class);
 
     public SpeedExampleClient() {
     }
 
     public static void main(String[] args) {
         ChannelConfig channelConfig = new ChannelConfig();
-        channelConfig.nodelay(true,30,2,true);
+
+        //是否启动无延迟模式。无延迟模式rtomin将设置为0，拥塞控制不启动
+        channelConfig.nodelay(false,30,2,true);
+
+        //send_windows size  设置发送窗口大小
         channelConfig.setSndwnd(10000);
+
+        //send_windows size  设置接收窗口大小
         channelConfig.setRcvwnd(10000);
-        channelConfig.setMtu(1400);
+
+        //Maximum Transmission Unit   最大传输单元，默认数据为1400，最小为50；
+        channelConfig.setMtu(50);
+
         channelConfig.setAckNoDelay(true);
+
+        //conversation id  表示会话编号的整数，和TCP的 conv一样，通信双方需保证 conv相同，相互的数据包才能够被接受
         channelConfig.setConv(55);
         channelConfig.setiMessageExecutorPool(new DisruptorExecutorPool(Runtime.getRuntime().availableProcessors()/2));
         //channelConfig.setFecDataShardCount(10);
         //channelConfig.setFecParityShardCount(3);
         channelConfig.setCrc32Check(false);
-        channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
+        //channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
+        channelConfig.setWriteBufferSize(80000000);
 
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
 
         //127.0.0.1   192.168.3.216
         SpeedExampleClient speedExampleClient = new SpeedExampleClient();
-        kcpClient.connect(new InetSocketAddress("192.168.3.216",20004),channelConfig,speedExampleClient);
+        kcpClient.connect(new InetSocketAddress("192.168.3.217",20004),channelConfig,speedExampleClient);
 
     }
-    private static final int messageSize = 1024;
+    private static final int messageSize = 2048;
     private long start = System.currentTimeMillis();
 
     @Override
@@ -118,14 +132,16 @@ public class SpeedExampleClient implements KcpListener {
                     e.printStackTrace();
                 }*/
 
-                byteBuf.writeBytes(new byte[100]);
+                byteBuf.writeBytes(new byte[10]);
+                logger.debug("0  开始往ukcp写入数据");
                 if(!ukcp.write(byteBuf)){
                     try {
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                         //System.out.println("ukcp.write(byteBuf)="+ukcp.write(byteBuf));
-                        //System.out.println("出问题了");
+                       //System.out.println("出问题了");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+
                     }
                 }
                 byteBuf.release();
@@ -147,7 +163,6 @@ public class SpeedExampleClient implements KcpListener {
     public void handleClose(Ukcp kcp) {
         //客户端只会不断发数据，没有断开这一说
         System.out.println("客户端断开");
-        getDateAndTime();
     }
 
     public void getDateAndTime(){

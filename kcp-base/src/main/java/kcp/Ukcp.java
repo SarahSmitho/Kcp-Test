@@ -10,6 +10,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.apache.log4j.Logger;
 import org.jctools.queues.MpscLinkedQueue;
 import threadPool.IMessageExecutor;
 
@@ -22,8 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Ukcp{
 
     private static final InternalLogger log = InternalLoggerFactory.getInstance(Ukcp.class);
+    private static Logger logger = Logger.getLogger(Ukcp.class);
 
-
+    //Kcp类
     private final IKcp kcp;
 
     private boolean fastFlush = true;
@@ -197,6 +199,7 @@ public class Ukcp{
      */
     void send(ByteBuf buf) throws IOException {
         int ret = kcp.send(buf);
+        logger.debug("6 转到kcp的发送函数 kcp.send(buf)现在是传送buf了");
         switch (ret) {
             case -2:
                 throw new IOException("Too many fragments");
@@ -248,6 +251,7 @@ public class Ukcp{
      * @param current current time in milliseconds
      * @return the next time to update
      */
+    //居然不用？？？
     protected long update(long current) {
         kcp.update(current);
         long nextTsUp = check(current);
@@ -373,6 +377,7 @@ public class Ukcp{
         }
         byteBuf = byteBuf.retainedDuplicate();
         writeBuffer.offer(byteBuf);
+        logger.debug("1  byteBuf成功来到  UKcp中的Queue<ByteBuf>");
         notifyWriteEvent();
         return true;
     }
@@ -430,6 +435,7 @@ public class Ukcp{
 
 
     void internalClose() {
+        //!为负号 active为真是，加！就为不真，不进入if语句
         if(!active){
             return;
         }

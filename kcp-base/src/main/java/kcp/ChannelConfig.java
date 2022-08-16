@@ -11,38 +11,63 @@ import threadPool.netty.NettyMessageExecutorPool;
 public class ChannelConfig {
     public static final int crc32Size = 4;
 
+    //conversation id  表示会话编号的整数，和TCP的 conv一样，通信双方需保证 conv相同，相互的数据包才能够被接受
     private int conv;
+
+    //是否启动无延迟模式。无延迟模式rtomin将设置为0，拥塞控制不启动
     private boolean nodelay;
+
+    //内部flush刷新间隔，对系统循环效率有非常重要影响
     private int interval = Kcp.IKCP_INTERVAL;
+
+    //触发快速重传的重复ACK个数
     private int fastresend;
+
+    //no congestion Window  取消拥塞控制
     private boolean nocwnd;
+
+    //send_windows size  发送窗口大小
     private int sndwnd = Kcp.IKCP_WND_SND;
+
+    //receive_windows size  接收窗口大小
     private int rcvwnd = Kcp.IKCP_WND_RCV;
+
+    //Retransmission TimeOut   最大传输单元，默认数据为1400，最小为50；
     private int mtu = Kcp.IKCP_MTU_DEF;
+
     //超时时间 超过一段时间没收到消息断开连接
     private long timeoutMillis;
+
     //TODO 可能有bug还未测试
     private boolean stream;
 
     //下面为新增参数
     private FecAdapt fecAdapt;
+
     //收到包立刻回传ack包
     private boolean ackNoDelay = false;
+
     //发送包立即调用flush 延迟低一些  cpu增加  如果interval值很小 建议关闭该参数
     private boolean fastFlush = true;
+
     //crc32校验
     private boolean crc32Check = false;
+
     //接收窗口大小(字节 -1不限制)
     private int readBufferSize = -1;
+
     //发送窗口大小(字节 -1不限制)
     private int writeBufferSize = -1;
 
+
     //增加ack包回复成功率 填 /8/16/32
     private int ackMaskSize = 0;
+
     /**
      * 使用conv确定一个channel 还是使用 socketAddress确定一个channel
      **/
     private boolean useConvChannel = false;
+
     /**
      * 处理kcp消息接收和发送的线程池
      **/

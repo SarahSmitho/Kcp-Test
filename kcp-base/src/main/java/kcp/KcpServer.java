@@ -121,13 +121,15 @@ public class KcpServer {
             }
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
+        //把断开连接逻辑关闭让他们一直连着
+        //Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
     public void stop() {
         localAddresss.forEach(
                 channel -> channel.close()
         );
+        //什么样才算判断读完了。。。。还不清楚该逻辑
         channelManager.getAll().forEach(ukcp ->
                 ukcp.close());
         if (iMessageExecutorPool != null) {

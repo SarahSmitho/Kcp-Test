@@ -39,11 +39,13 @@ public class SpeedExampleServer implements KcpListener {
     }
 
     long start = System.currentTimeMillis();
-
+    long TestStart ;
+    long TestEnd;
 
     @Override
     public void onConnected(Ukcp ukcp) {
         System.out.println("有连接进来"+Thread.currentThread().getName()+ukcp.user().getRemoteAddress());
+        TestStart = System.currentTimeMillis();
     }
 
     long inBytes = 0;
@@ -74,6 +76,8 @@ public class SpeedExampleServer implements KcpListener {
         Snmp.snmp  = new Snmp();
         System.out.println("服务器断开");
         getDateAndTime();
+        TestEnd = System.currentTimeMillis();
+        System.out.println("传输活动持续时长="+(TestEnd-TestStart));
     }
 
     public void getDateAndTime(){

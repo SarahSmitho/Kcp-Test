@@ -46,6 +46,7 @@ public class KcpClient {
         }
     }
 
+    //netty的东西
     public void init(ChannelConfig channelConfig) {
         if(channelConfig.isUseConvChannel()){
             int convIndex = 0;

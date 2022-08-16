@@ -8,6 +8,8 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.Recycler;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,7 +24,7 @@ import java.util.ListIterator;
 public class Kcp implements IKcp {
 
     private static final InternalLogger log = InternalLoggerFactory.getInstance(Kcp.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(Kcp.class);
     /**
      * no delay min rto
      */
@@ -157,7 +159,8 @@ public class Kcp implements IKcp {
     /**收到包立即回ack**/
     private boolean ackNoDelay;
 
-    /**待发送窗口窗口**/
+    /**待发送窗口队列**/
+    //最后还得观察这个队列往哪走
     private LinkedList<Segment> sndQueue = new LinkedList<>();
     /**发送后待确认的队列**/
     private ReItrLinkedList<Segment> sndBuf = new ReItrLinkedList<>();
@@ -188,6 +191,8 @@ public class Kcp implements IKcp {
     /**头部预留长度  为fec checksum准备**/
     private int reserved;
 
+    //因为接口是不能生成对象的，必须由实现接口的类来重写里面的方法，所以用接口类名其实引用的是实现类的对象
+    //这种形式只能使用实现接口中存在的方法
     private KcpOutput output;
 
     private ByteBufAllocator byteBufAllocator = ByteBufAllocator.DEFAULT;
@@ -209,12 +214,13 @@ public class Kcp implements IKcp {
 
     private static void output(ByteBuf data, Kcp kcp) {
         if (log.isDebugEnabled()) {
-            log.debug("{} [RO] {} bytes", kcp, data.readableBytes());
+           //log.debug("{} [RO] {} bytes", kcp, data.readableBytes());
         }
         if (data.readableBytes() == 0) {
             return;
         }
         kcp.output.out(data, kcp);
+        logger.debug("14 kcp.output.out(data, kcp)");
     }
 
     private static int encodeSeg(ByteBuf buf, Segment seg) {
@@ -299,7 +305,7 @@ public class Kcp implements IKcp {
 
             // log
             if (log.isDebugEnabled()) {
-                log.debug("{} recv sn={}", this, seg.sn);
+                //log.debug("{} recv sn={}", this, seg.sn);
             }
             if(byteBuf==null){
                 if(fragment==0){
@@ -366,7 +372,7 @@ public class Kcp implements IKcp {
 
             // log
             if (log.isDebugEnabled()) {
-                log.debug("{} recv sn={}", this, seg.sn);
+                //log.debug("{} recv sn={}", this, seg.sn);
             }
 
             itr.remove();
@@ -448,6 +454,7 @@ public class Kcp implements IKcp {
     }
 
 
+    //别跟丢了，buf才是上面传下来的
     @Override
     public int send(ByteBuf buf) {
         assert mss > 0;
@@ -500,9 +507,12 @@ public class Kcp implements IKcp {
         // segment
         for (int i = 0; i < count; i++) {
             int size = len > mss ? mss : len;
+            //这里这里
             Segment seg = Segment.createSegment(buf.readRetainedSlice(size));
+            logger.debug("4 Segment.createSegment(buf.readRetainedSlice(size))   存储在buf");
             seg.frg = (short) (stream ? 0 : count - i - 1);
             sndQueue.add(seg);
+            logger.debug("5 seg再给到sndQueue   sndQueue.add(seg) ");
             len = buf.readableBytes();
         }
 
@@ -709,7 +719,7 @@ public class Kcp implements IKcp {
             return -1;
         }
         if (log.isDebugEnabled()) {
-            log.debug("{} [RI] {} bytes", this, data.readableBytes());
+            //log.debug("{} [RI] {} bytes", this, data.readableBytes());
         }
 
 
@@ -792,7 +802,7 @@ public class Kcp implements IKcp {
                     latest= ts;
                     int rtt = itimediff(uintCurrent, ts);
                     if (log.isDebugEnabled()) {
-                        log.debug("{} input ack: sn={}, rtt={}, rto={} ,regular={} ts={}", this, sn, rtt, rxRto,regular,ts);
+                        //log.debug("{} input ack: sn={}, rtt={}, rto={} ,regular={} ts={}", this, sn, rtt, rxRto,regular,ts);
                     }
                     break;
                 }
@@ -821,7 +831,7 @@ public class Kcp implements IKcp {
                         Snmp.snmp.RepeatSegs.increment();
                     }
                     if (log.isDebugEnabled()) {
-                        log.debug("{} input push: sn={}, una={}, ts={},regular={}", this, sn, una, ts,regular);
+                        //log.debug("{} input push: sn={}, una={}, ts={},regular={}", this, sn, una, ts,regular);
                     }
                     break;
                 }
@@ -830,14 +840,14 @@ public class Kcp implements IKcp {
                     // tell remote my window size
                     probe |= IKCP_ASK_TELL;
                     if (log.isDebugEnabled()) {
-                        log.debug("{} input ask", this);
+                        //log.debug("{} input ask", this);
                     }
                     break;
                 }
                 case IKCP_CMD_WINS: {
                     // do nothing
                     if (log.isDebugEnabled()) {
-                        log.debug("{} input tell: {}", this, wnd);
+                        //log.debug("{} input tell: {}", this, wnd);
                     }
                     break;
                 }
@@ -920,11 +930,13 @@ public class Kcp implements IKcp {
         return buffer;
     }
 
+    //用了这个就能发送了
     private void flushBuffer(ByteBuf buffer){
         if(buffer==null)
             return;
         if (buffer.readableBytes() > reserved) {
             output(buffer, this);
+            logger.debug("15 output(buffer, this);");
             return;
         }
         buffer.release();
@@ -994,13 +1006,14 @@ public class Kcp implements IKcp {
         for (int i = 0; i < count; i++) {
             long sn =  acklist[i * 2];
             if (itimediff(sn , rcvNxt)>=0 || count-1 == i) {
+                //满的时候就已经发过一次了，进去
                 buffer =  makeSpace(buffer,IKCP_OVERHEAD);
                 seg.sn = sn;
                 seg.ts = acklist[i * 2 + 1];
                 encodeSeg(buffer, seg);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("{} flush ack: sn={}, ts={} ,count={}", this, seg.sn, seg.ts,count);
+                    //log.debug("{} flush ack: sn={}, ts={} ,count={}", this, seg.sn, seg.ts,count);
                 }
             }
         }
@@ -1009,7 +1022,9 @@ public class Kcp implements IKcp {
 
 
         if(ackOnly){
+            //这里看起来是发送的
             flushBuffer(buffer);
+            //
             seg.recycle(true);
             return interval;
         }
@@ -1044,7 +1059,7 @@ public class Kcp implements IKcp {
             buffer = makeSpace(buffer,IKCP_OVERHEAD);
             encodeSeg(buffer, seg);
             if (log.isDebugEnabled()) {
-                log.debug("{} flush ask", this);
+                //log.debug("{} flush ask", this);
             }
         }
 
@@ -1054,7 +1069,7 @@ public class Kcp implements IKcp {
             buffer = makeSpace(buffer,IKCP_OVERHEAD);
             encodeSeg(buffer, seg);
             if (log.isDebugEnabled()) {
-                log.debug("{} flush tell: wnd={}", this, seg.wnd);
+                //log.debug("{} flush tell: wnd={}", this, seg.wnd);
             }
         }
 
@@ -1070,13 +1085,16 @@ public class Kcp implements IKcp {
         // move data from snd_queue to snd_buf
         while (itimediff(sndNxt, sndUna + cwnd0) < 0) {
             Segment newSeg = sndQueue.poll();
+            //推出sndQueue队列头部元素
             if (newSeg == null) {
                 break;
             }
             newSeg.conv = conv;
             newSeg.cmd = IKCP_CMD_PUSH;
             newSeg.sn = sndNxt;
+            //sndQueue给到了sndBuf
             sndBuf.add(newSeg);
+            logger.debug("8 sndQueue给到了sndBuf");
             sndNxt++;
             newSegsCount++;
         }
@@ -1091,15 +1109,18 @@ public class Kcp implements IKcp {
         long minrto = interval;
 
 
+        //唯一解释sndBuf
         for (Iterator<Segment> itr = sndBufItr.rewind(); itr.hasNext();) {
+            logger.debug("9 sndBufItr 数据给到 itr");
             Segment segment = itr.next();
+            logger.debug("10 itr 数据给到 segment");
             boolean needsend = false;
             if (segment.xmit == 0) {
                 needsend = true;
                 segment.rto = rxRto;
                 segment.resendts = current + segment.rto;
                 if (log.isDebugEnabled()) {
-                    log.debug("{} flush data: sn={}, resendts={}", this, segment.sn, (segment.resendts - current));
+                    //log.debug("{} flush data: sn={}, resendts={}", this, segment.sn, (segment.resendts - current));
                 }
             }  else if (segment.fastack >= resent) {
                 needsend = true;
@@ -1109,8 +1130,8 @@ public class Kcp implements IKcp {
                 change++;
                 fastRetransSegs++;
                 if (log.isDebugEnabled()) {
-                    log.debug("{} fastresend. sn={}, xmit={}, resendts={} ", this, segment.sn, segment.xmit, (segment
-                            .resendts - current));
+                    //log.debug("{} fastresend. sn={}, xmit={}, resendts={} ", this, segment.sn, segment.xmit, (segment
+                         //   .resendts - current));
                 }
             }
             else if(segment.fastack>0 &&newSegsCount==0){  // early retransmit
@@ -1133,8 +1154,8 @@ public class Kcp implements IKcp {
                 lost = true;
                 lostSegs++;
                 if (log.isDebugEnabled()) {
-                    log.debug("{} resend. sn={}, xmit={}, resendts={}", this, segment.sn, segment.xmit, (segment
-                            .resendts - current));
+                    //log.debug("{} resend. sn={}, xmit={}, resendts={}", this, segment.sn, segment.xmit, (segment
+                            //.resendts - current));
                 }
             }
 
@@ -1148,6 +1169,7 @@ public class Kcp implements IKcp {
                 segment.ackMask = ackMask;
 
                 ByteBuf segData = segment.data;
+                logger.debug("11 segment 数据给到 segData");
                 int segLen = segData.readableBytes();
                 int need = IKCP_OVERHEAD + segLen;
                 buffer = makeSpace(buffer,need);
@@ -1156,6 +1178,7 @@ public class Kcp implements IKcp {
                 if (segLen > 0) {
                     // don't increases data's readerIndex, because the data may be resend.
                     buffer.writeBytes(segData, segData.readerIndex(), segLen);
+                    logger.debug("12 segData 数据给到 buffer");
                 }
 
                 //if (segment.xmit >= deadLink) {
@@ -1171,7 +1194,12 @@ public class Kcp implements IKcp {
         }
 
         // flash remain segments
+
+        //上面取了那个SndBuf在这里发
+        //TODO　这里这里
         flushBuffer(buffer);
+        logger.debug("16 flushBuffer(buffer)");
+        //在内部函数的全部走完才能出来
         seg.recycle(true);
 
         int sum = lostSegs;
