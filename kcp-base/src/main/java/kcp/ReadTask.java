@@ -3,6 +3,7 @@ package kcp;
 import com.backblaze.erasure.fec.Snmp;
 import internal.CodecOutputList;
 import io.netty.buffer.ByteBuf;
+import org.apache.log4j.Logger;
 import threadPool.ITask;
 
 import java.util.Queue;
@@ -12,7 +13,7 @@ import java.util.Queue;
  * 2018/9/11.
  */
 public class ReadTask implements ITask {
-
+    private static Logger logger = Logger.getLogger(ReadTask.class);
 
     private final Ukcp ukcp;
 
@@ -29,9 +30,12 @@ public class ReadTask implements ITask {
             //查看连接状态
             if (!ukcp.isActive()) {
                 return;
+
             }
+            logger.debug("1  ukcp为活跃状态");
             long current = System.currentTimeMillis();
             Queue<ByteBuf> recieveList = ukcp.getReadBuffer();
+            logger.debug("2  byteBuf成功来到  UKcp中的Queue<ByteBuf>");
             int readCount =0;
             for (; ; ) {
                 ByteBuf byteBuf = recieveList.poll();

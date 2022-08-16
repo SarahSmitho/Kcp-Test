@@ -41,7 +41,7 @@ public class SpeedExampleClient implements KcpListener {
         channelConfig.setRcvwnd(10000);
 
         //Maximum Transmission Unit   最大传输单元，默认数据为1400，最小为50；
-        channelConfig.setMtu(50);
+        channelConfig.setMtu(1400);
 
         channelConfig.setAckNoDelay(true);
 
@@ -52,7 +52,7 @@ public class SpeedExampleClient implements KcpListener {
         //channelConfig.setFecParityShardCount(3);
         channelConfig.setCrc32Check(false);
         //channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
-        channelConfig.setWriteBufferSize(80000000);
+        channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
 
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
@@ -132,7 +132,7 @@ public class SpeedExampleClient implements KcpListener {
                     e.printStackTrace();
                 }*/
 
-                byteBuf.writeBytes(new byte[10]);
+                byteBuf.writeBytes(new byte[1000]);
                 logger.debug("0  开始往ukcp写入数据");
                 if(!ukcp.write(byteBuf)){
                     try {
