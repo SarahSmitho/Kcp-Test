@@ -18,6 +18,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     public ClientChannelHandler(IChannelManager channelManager) {
         this.channelManager = channelManager;
     }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         logger.error("",cause);

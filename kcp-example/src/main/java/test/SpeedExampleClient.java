@@ -35,14 +35,15 @@ public class SpeedExampleClient implements KcpListener {
         channelConfig.nodelay(false,30,2,true);
 
         //send_windows size  设置发送窗口大小
-        channelConfig.setSndwnd(10000);
+        channelConfig.setSndwnd(8000);
 
-        //send_windows size  设置接收窗口大小
+        //receive_windows size  设置接收窗口大小
         channelConfig.setRcvwnd(10000);
 
         //Maximum Transmission Unit   最大传输单元，默认数据为1400，最小为50；
         channelConfig.setMtu(1400);
 
+        //收到包立刻回传ack包
         channelConfig.setAckNoDelay(true);
 
         //conversation id  表示会话编号的整数，和TCP的 conv一样，通信双方需保证 conv相同，相互的数据包才能够被接受
@@ -59,7 +60,7 @@ public class SpeedExampleClient implements KcpListener {
 
         //127.0.0.1   192.168.3.216
         SpeedExampleClient speedExampleClient = new SpeedExampleClient();
-        kcpClient.connect(new InetSocketAddress("192.168.3.217",20004),channelConfig,speedExampleClient);
+        kcpClient.connect(new InetSocketAddress("127.0.0.1",20004),channelConfig,speedExampleClient);
 
     }
     private static final int messageSize = 2048;

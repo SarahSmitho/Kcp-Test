@@ -20,20 +20,23 @@ public class SpeedExampleServer implements KcpListener {
     public static void main(String[] args) {
 
         SpeedExampleServer speedExampleServer = new SpeedExampleServer();
+
         ChannelConfig channelConfig = new ChannelConfig();
+        //是否启动无延迟模式。无延迟模式rtomin将设置为0，拥塞控制不启动  retransmission TimeOut
         channelConfig.nodelay(true,30,2,true);
-        //10000 比较稳定，在200MB到250之间，25000不稳定，波动很大有时候是在0，但是最大值也是200多
-        //20000也不行，有时候回事70，波动很大;15000也不行
-        channelConfig.setSndwnd(10000);
+        channelConfig.setSndwnd(8000);
         channelConfig.setRcvwnd(10000);
+        //Maximum Transmission Unit  设置最大传输单元
         channelConfig.setMtu(1400);
         channelConfig.setiMessageExecutorPool(new DisruptorExecutorPool(Runtime.getRuntime().availableProcessors()/2));
         //channelConfig.setFecDataShardCount(10);
         //channelConfig.setFecParityShardCount(3);
         channelConfig.setAckNoDelay(true);
-        channelConfig.setTimeoutMillis(5000);
+        //超时时间 超过一段时间没收到消息断开连接
+        channelConfig.setTimeoutMillis(20000);
         channelConfig.setUseConvChannel(true);
         channelConfig.setCrc32Check(false);
+
         KcpServer kcpServer = new KcpServer();
         kcpServer.init(speedExampleServer,channelConfig,20004);
     }

@@ -25,7 +25,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by JinMiao
  * 2018/9/20.
  */
+
+//就一个初始化 init 和停止 stop 函数
 public class KcpServer {
+    //处理kcp消息接收和发送的线程池
     private IMessageExecutorPool iMessageExecutorPool;
 
     private Bootstrap bootstrap;
@@ -56,6 +59,7 @@ public class KcpServer {
 
 
     public void init(KcpListener kcpListener, ChannelConfig channelConfig, int... ports) {
+        //默认不使用Conv模式
         if(channelConfig.isUseConvChannel()){
             int convIndex = 0;
             if(channelConfig.getFecAdapt()!=null){
@@ -125,6 +129,7 @@ public class KcpServer {
         //Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
+    //停止的逻辑
     public void stop() {
         localAddresss.forEach(
                 channel -> channel.close()

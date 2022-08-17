@@ -336,6 +336,7 @@ public class Ukcp{
     }
 
     protected void read(ByteBuf byteBuf) {
+        //不管这段逻辑
         if(controlReadBufferSize){
             int readBufferSize =readBufferIncr.getAndUpdate(operand -> {
                 if(operand==0){
@@ -434,6 +435,7 @@ public class Ukcp{
     }
 
 
+    //内部flush刷新间隔，对系统循环效率有非常重要影响
     void internalClose() {
         //!为负号 active为真是，加！就为不真，不进入if语句
         if(!active){
@@ -442,6 +444,7 @@ public class Ukcp{
         this.active = false;
         notifyReadEvent();
         kcpListener.handleClose(this);
+        System.out.println("服务器断开");
         //关闭之前尽量把消息都发出去
         notifyWriteEvent();
         kcp.flush(false,System.currentTimeMillis());

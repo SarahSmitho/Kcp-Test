@@ -55,6 +55,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object object) {
         final ChannelConfig channelConfig = this.channelConfig;
+        //接收DatagramPacket
         DatagramPacket msg = (DatagramPacket) object;
         Ukcp ukcp = channelManager.get(msg);
         ByteBuf byteBuf = msg.content();
@@ -63,6 +64,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             User user = ukcp.user();
             //每次收到消息重绑定地址
             user.setRemoteAddress(msg.sender());
+            //read函数是把byteBuf读到ukcp里的readBuffer里    this.readBuffer.offer(byteBuf);
             ukcp.read(byteBuf);
             return;
         }
