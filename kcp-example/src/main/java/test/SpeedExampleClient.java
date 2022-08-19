@@ -58,9 +58,9 @@ public class SpeedExampleClient implements KcpListener {
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
 
-        //127.0.0.1   192.168.3.216    公司电脑 192.168.3.217
+        //127.0.0.1   192.168.3.184    公司电脑 192.168.3.217
         SpeedExampleClient speedExampleClient = new SpeedExampleClient();
-        kcpClient.connect(new InetSocketAddress("127.0.0.1",20004),channelConfig,speedExampleClient);
+        kcpClient.connect(new InetSocketAddress("192.168.3.184",20004),channelConfig,speedExampleClient);
 
     }
     private static final int messageSize = 2048;
