@@ -11,10 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import threadPool.disruptor.DisruptorExecutorPool;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Calendar;
 
@@ -35,10 +31,10 @@ public class SpeedExampleClient implements KcpListener {
         channelConfig.nodelay(true,30,2,true);
 
         //send_windows size  设置发送窗口大小
-        channelConfig.setSndwnd(800000);
+        channelConfig.setSndwnd(8000);
 
         //receive_windows size  设置接收窗口大小
-        channelConfig.setRcvwnd(100000);
+        channelConfig.setRcvwnd(10000);
 
         //Maximum Transmission Unit   最大传输单元，默认数据为1400，最小为50；
         channelConfig.setMtu(1400);
