@@ -32,13 +32,13 @@ public class SpeedExampleClient implements KcpListener {
         ChannelConfig channelConfig = new ChannelConfig();
 
         //是否启动无延迟模式。无延迟模式rtomin将设置为0，拥塞控制不启动
-        channelConfig.nodelay(false,30,2,true);
+        channelConfig.nodelay(true,30,2,true);
 
         //send_windows size  设置发送窗口大小
-        channelConfig.setSndwnd(800000000);
+        channelConfig.setSndwnd(800000);
 
         //receive_windows size  设置接收窗口大小
-        channelConfig.setRcvwnd(100000000);
+        channelConfig.setRcvwnd(100000);
 
         //Maximum Transmission Unit   最大传输单元，默认数据为1400，最小为50；
         channelConfig.setMtu(1400);
