@@ -57,6 +57,7 @@ public class SpeedExampleClient implements KcpListener {
 
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
+        //Cannot reserve 16777216 bytes 16MB of direct buffer memory (allocated: 2063605861, limit: 2065694720)
 
         //127.0.0.1   192.168.3.184    公司电脑 192.168.3.217
         SpeedExampleClient speedExampleClient = new SpeedExampleClient();

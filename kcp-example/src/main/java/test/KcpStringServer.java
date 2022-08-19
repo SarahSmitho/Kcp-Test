@@ -41,6 +41,7 @@ public class KcpStringServer implements KcpListener {
     long end = System.currentTimeMillis();
     @Override
     public void handleReceive(ByteBuf buf, Ukcp kcp) {
+        System.out.println("连接上了");
 /*        byte[] bytes = new  byte[buf.readableBytes()];
         buf.getBytes(buf.readerIndex(),bytes);
         System.out.println("收到消息: "+new String(bytes));
