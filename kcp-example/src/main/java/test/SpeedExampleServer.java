@@ -33,7 +33,7 @@ public class SpeedExampleServer implements KcpListener {
         //channelConfig.setFecParityShardCount(3);
         channelConfig.setAckNoDelay(true);
         //超时时间 超过一段时间没收到消息断开连接
-        channelConfig.setTimeoutMillis(20000);
+        channelConfig.setTimeoutMillis(3600000);
         channelConfig.setUseConvChannel(true);
         channelConfig.setCrc32Check(false);
 
