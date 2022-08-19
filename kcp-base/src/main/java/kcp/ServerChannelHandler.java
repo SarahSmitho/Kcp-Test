@@ -54,15 +54,18 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object object) {
+        logger.error("channelRead执行");
         final ChannelConfig channelConfig = this.channelConfig;
         //接收DatagramPacket
         DatagramPacket msg = (DatagramPacket) object;
         Ukcp ukcp = channelManager.get(msg);
+        //不管那么多得到的是msg里的数据
         ByteBuf byteBuf = msg.content();
 
         if (ukcp != null) {
             User user = ukcp.user();
             //每次收到消息重绑定地址
+            //客户端的
             user.setRemoteAddress(msg.sender());
             //read函数是把byteBuf读到ukcp里的readBuffer里    this.readBuffer.offer(byteBuf);
             ukcp.read(byteBuf);
@@ -92,6 +95,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         });
 
         newUkcp.read(byteBuf);
+        //两个Ukcp目的是什么？？？？
 
         ScheduleTask scheduleTask = new ScheduleTask(iMessageExecutor, newUkcp,hashedWheelTimer);
         hashedWheelTimer.newTimeout(scheduleTask,newUkcp.getInterval(), TimeUnit.MILLISECONDS);

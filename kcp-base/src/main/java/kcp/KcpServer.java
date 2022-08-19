@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 2018/9/20.
  */
 
-//就一个初始化 init 和停止 stop 函数
+//就一个初始化 init函数 和停止 stop函数
 public class KcpServer {
     //处理kcp消息接收和发送的线程池
     private IMessageExecutorPool iMessageExecutorPool;
@@ -124,9 +124,10 @@ public class KcpServer {
                 localAddresss.add(channel);
             }
         }
-
+        //看内部应该是一直开着，然后等某个条件（主动）触发回调然后关闭，因为这个
+        // if(!active){return;}所以internalclose里的
         //把断开连接逻辑关闭让他们一直连着
-        //Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
     //停止的逻辑

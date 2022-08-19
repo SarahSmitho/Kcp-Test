@@ -24,8 +24,8 @@ public class SpeedExampleServer implements KcpListener {
         ChannelConfig channelConfig = new ChannelConfig();
         //是否启动无延迟模式。无延迟模式rtomin将设置为0，拥塞控制不启动  retransmission TimeOut
         channelConfig.nodelay(true,30,2,true);
-        channelConfig.setSndwnd(8000);
-        channelConfig.setRcvwnd(10000);
+        channelConfig.setSndwnd(800000000);
+        channelConfig.setRcvwnd(100000000);
         //Maximum Transmission Unit  设置最大传输单元
         channelConfig.setMtu(1400);
         channelConfig.setiMessageExecutorPool(new DisruptorExecutorPool(Runtime.getRuntime().availableProcessors()/2));

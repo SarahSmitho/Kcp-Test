@@ -100,12 +100,14 @@ public class Kcp implements IKcp {
     public static final int IKCP_SN_OFFSET   = 12;
 
 
+    //??
     private int ackMaskSize = 0;
     /**会话id**/
     private int conv;
     /**最大传输单元**/
     private int mtu = IKCP_MTU_DEF;
-    /**最大分节大小  mtu减去头等部分**/
+    /**最大分节大小 Maximum Segment Size   mtu减去头等部分**/
+    //IKCPSEG数据结构 conv、cmd、frg、wnd、ts、sn、una、len加起来的数据长度为24个字节
     private int mss = this.mtu - IKCP_OVERHEAD;
     /**状态**/
     private int state;
@@ -197,6 +199,7 @@ public class Kcp implements IKcp {
 
     private ByteBufAllocator byteBufAllocator = ByteBufAllocator.DEFAULT;
     /**ack二进制标识**/
+    //确认掩码？？？
     private long ackMask;
     private long lastRcvNxt;
 

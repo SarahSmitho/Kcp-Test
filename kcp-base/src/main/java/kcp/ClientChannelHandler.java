@@ -21,7 +21,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error("",cause);
+        //logger.error("",cause); ???
         //SocketAddress socketAddress = ctx.channel().localAddress();
         //Ukcp ukcp = ukcpMap.get(socketAddress);
         //ukcp.getKcpListener().handleException(cause,ukcp);

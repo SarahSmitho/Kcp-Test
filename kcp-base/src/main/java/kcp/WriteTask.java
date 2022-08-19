@@ -34,6 +34,7 @@ public class WriteTask implements ITask {
             //从发送缓冲区到kcp缓冲区   ????
             Queue<ByteBuf> queue = ukcp.getWriteBuffer();
             logger.debug("2  从ukcp中的queue  Queue<ByteBuf> queue = ukcp.getWriteBuffer()");
+            logger.error("2  从ukcp中的queue  Queue<ByteBuf> queue = ukcp.getWriteBuffer()");
             int writeCount =0;
             long writeBytes = 0;
             //这句话更加重要
@@ -41,6 +42,7 @@ public class WriteTask implements ITask {
                 //得到队列头部的元素
                 ByteBuf byteBuf = queue.poll();
                 logger.debug("3  得到队列queue中的头部元素   ByteBuf byteBuf = queue.poll()");
+                logger.error("3  得到队列queue中的头部元素   ByteBuf byteBuf = queue.poll()");
                 if(byteBuf==null){
                     break;
                 }
@@ -50,6 +52,7 @@ public class WriteTask implements ITask {
                     //这里
                     ukcp.send(byteBuf);
                     logger.debug("7  ukcp的发送函数结束  ukcp.send(byteBuf)");
+                    logger.error("7  ukcp的发送函数结束  ukcp.send(byteBuf)");
                     byteBuf.release();
                 } catch (IOException e) {
                     ukcp.getKcpListener().handleException(e, ukcp);

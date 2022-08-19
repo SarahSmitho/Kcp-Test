@@ -16,7 +16,7 @@ public interface IKcp {
     ByteBuf mergeRecv();
 
     /**
-     * 1，判断是否有完整的包，如果有就抛给下一层
+     * 1，判断是否有完整的包，如果有就抛给下一层   下一层???ukcp??
      * 2，整理消息接收队列，判断下一个包是否已经收到 收到放入rcvQueue
      * 3，判断接收窗口剩余是否改变，如果改变记录需要通知
      * @param bufList

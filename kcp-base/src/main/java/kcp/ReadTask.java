@@ -12,7 +12,9 @@ import java.util.Queue;
  * Created by JinMiao
  * 2018/9/11.
  */
-//如果是服务端的话 只有     logger.error("3  把队列里的每一个元素输入到ukcp中  ukcp.input(byteBuf, current)");
+//服务端只走ReadTask
+
+//如果是服务端的话 只有    1  2   logger.error("3  把队列里的每一个元素输入到ukcp中  ukcp.input(byteBuf, current)");
 //                      logger.error("4  ukcp.canRecv()");    7  走完ReadTask  最后退出的时候出现的
 
 //如果是客户端的话 只有    1  ukcp为活跃状态    2  从ukcp获取ReadBuffer队列

@@ -35,10 +35,10 @@ public class SpeedExampleClient implements KcpListener {
         channelConfig.nodelay(false,30,2,true);
 
         //send_windows size  设置发送窗口大小
-        channelConfig.setSndwnd(8000);
+        channelConfig.setSndwnd(800000000);
 
         //receive_windows size  设置接收窗口大小
-        channelConfig.setRcvwnd(10000);
+        channelConfig.setRcvwnd(100000000);
 
         //Maximum Transmission Unit   最大传输单元，默认数据为1400，最小为50；
         channelConfig.setMtu(1400);
@@ -58,7 +58,7 @@ public class SpeedExampleClient implements KcpListener {
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
 
-        //127.0.0.1   192.168.3.216
+        //127.0.0.1   192.168.3.216    公司电脑 192.168.3.217
         SpeedExampleClient speedExampleClient = new SpeedExampleClient();
         kcpClient.connect(new InetSocketAddress("127.0.0.1",20004),channelConfig,speedExampleClient);
 

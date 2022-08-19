@@ -211,7 +211,7 @@ public class Ukcp{
 
     /**
      * Returns {@code true} if there are bytes can be received.
-     *
+     *判断一条消息是否完整收全了
      * @return
      */
     protected boolean canRecv() {
@@ -443,13 +443,14 @@ public class Ukcp{
         }
         this.active = false;
         notifyReadEvent();
+        System.out.println("服务器断开  internalClose()");
         kcpListener.handleClose(this);
-        System.out.println("服务器断开");
         //关闭之前尽量把消息都发出去
         notifyWriteEvent();
         kcp.flush(false,System.currentTimeMillis());
         //连接删除
         channelManager.del(this);
+        System.out.println("服务器断开 把ukcp对端的IP删除  internalClose() ");
         release();
     }
 
@@ -517,6 +518,7 @@ public class Ukcp{
 
     protected Ukcp user(User user) {
         kcp.setUser(user);
+        //this是什么意思，这个类？Ukcp
         return this;
     }
 

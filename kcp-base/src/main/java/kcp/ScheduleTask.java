@@ -3,6 +3,7 @@ package kcp;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
+import org.apache.log4j.Logger;
 import threadPool.IMessageExecutor;
 import threadPool.ITask;
 
@@ -14,7 +15,10 @@ import java.util.concurrent.TimeUnit;
  */
 //Schedule 日程
 public class ScheduleTask implements ITask, Runnable, TimerTask {
+    private static Logger logger = Logger.getLogger(ScheduleTask.class);
 
+    //消息处理器
+    // void execute(ITask iTask); * 执行任务  注意: 如果线程等于当前线程 则直接执行  如果非当前线程放进队列
     private final IMessageExecutor messageExecutor;
 
     private final Ukcp ukcp;
@@ -35,13 +39,15 @@ public class ScheduleTask implements ITask, Runnable, TimerTask {
     //问题: 精准大量的flush触发会导致ack重复发送   流量增大？  不会的 ack只会发送一次
     @Override
     public void execute() {
+        logger.error("ScheduleTask执行");
         try {
             final Ukcp ukcp = this.ukcp;
             long now = System.currentTimeMillis();
             //判断连接是否关闭
-           /* if (ukcp.getTimeoutMillis() != 0 && now - ukcp.getTimeoutMillis() > ukcp.getLastRecieveTime()) {
+            if (ukcp.getTimeoutMillis() != 0 && now - ukcp.getTimeoutMillis() > ukcp.getLastRecieveTime()) {
+                System.out.println(" 在ScheduleTask中断开 ");
                 ukcp.internalClose();
-            }*/
+            }
             if (!ukcp.isActive()) {
                 return;
             }
@@ -63,8 +69,10 @@ public class ScheduleTask implements ITask, Runnable, TimerTask {
         }
     }
 
+
     @Override
     public void run() {
+        // void execute(ITask iTask); * 执行任务  注意: 如果线程等于当前线程 则直接执行  如果非当前线程放进队列
         this.messageExecutor.execute(this);
     }
 
