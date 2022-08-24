@@ -44,8 +44,9 @@ public class ChannelConfig {
     //下面为新增参数
     private FecAdapt fecAdapt;
 
-    //收到包立刻回传ack包
+    //收到包立刻回传ack包   加快接收端回复时间，减少RTT
     private boolean ackNoDelay = false;
+
 
     //发送包立即调用flush 延迟低一些  cpu增加  如果interval值很小 建议关闭该参数
     private boolean fastFlush = true;
@@ -61,7 +62,8 @@ public class ChannelConfig {
 
 
     //增加ack包回复成功率 填 /8/16/32
-    private int ackMaskSize = 0;
+    //private int ackMaskSize = 0;
+    private int ackMaskSize = 32;
 
     /**
      * 使用conv确定一个channel 还是使用 socketAddress确定一个channel

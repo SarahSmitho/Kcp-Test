@@ -1,8 +1,6 @@
 package kcp;
 
-import com.backblaze.erasure.ReedSolomon;
 import com.backblaze.erasure.fec.Fec;
-import com.backblaze.erasure.fecNative.ReedSolomonNative;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -19,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * Created by JinMiao
  * 2018/9/20.
  */
+//数据从这个类读进来的
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     static final Logger logger = LoggerFactory.getLogger(ServerChannelHandler.class);
 
@@ -52,11 +51,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
         //ukcp.getKcpListener().handleException(cause,ukcp);
     }
 
+    //netty会执行这个回调，
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object object) {
         logger.error("channelRead执行");
         final ChannelConfig channelConfig = this.channelConfig;
-        //接收DatagramPacket
+        //接收DatagramPacket，这个就是数据包，数据传进来
         DatagramPacket msg = (DatagramPacket) object;
         Ukcp ukcp = channelManager.get(msg);
         //不管那么多得到的是msg里的数据
@@ -68,6 +68,7 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
             //客户端的
             user.setRemoteAddress(msg.sender());
             //read函数是把byteBuf读到ukcp里的readBuffer里    this.readBuffer.offer(byteBuf);
+            //把收到的byteBuf读进去，然后我们进去到这个函数
             ukcp.read(byteBuf);
             return;
         }

@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class KcpServer {
     //处理kcp消息接收和发送的线程池
     private IMessageExecutorPool iMessageExecutorPool;
-
+    //这些就是netty的东西，我还没研究看不懂
     private Bootstrap bootstrap;
     private EventLoopGroup group;
     private List<Channel> localAddresss = new Vector<>();
@@ -58,6 +58,7 @@ public class KcpServer {
     //}
 
 
+    //KcpListener 通过回调来调用KCP的东西，这个是刚才的信道设置，那些快速回传都设置给这个对象，ports端口，ip的话是有一个USER类管理
     public void init(KcpListener kcpListener, ChannelConfig channelConfig, int... ports) {
         //默认不使用Conv模式
         if(channelConfig.isUseConvChannel()){
@@ -70,6 +71,7 @@ public class KcpServer {
             channelManager = new ServerAddressChannelManager();
         }
 
+        //这些都是netty 东西我用不到
         hashedWheelTimer = new HashedWheelTimer(new TimerThreadFactory(),1, TimeUnit.MILLISECONDS);
 
 
@@ -102,7 +104,8 @@ public class KcpServer {
             @Override
             protected void initChannel(Channel ch) {
                 ServerChannelHandler serverChannelHandler = new ServerChannelHandler(channelManager, channelConfig, iMessageExecutorPool, kcpListener,hashedWheelTimer);
-                ChannelPipeline cp = ch.pipeline();
+                ChannelPipeline
+                        cp = ch.pipeline();
                 if(channelConfig.isCrc32Check()){
                     Crc32Encode crc32Encode = new Crc32Encode();
                     Crc32Decode crc32Decode = new Crc32Decode();
@@ -130,7 +133,7 @@ public class KcpServer {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> stop()));
     }
 
-    //停止的逻辑
+    //停止的逻辑，要关闭的时候就把
     public void stop() {
         localAddresss.forEach(
                 channel -> channel.close()

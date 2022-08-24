@@ -147,6 +147,7 @@ public class Ukcp{
     }
 
 
+    //刚才进来的数据
     protected void input(ByteBuf data,long current) throws IOException {
         //lastRecieveTime = System.currentTimeMillis();
         Snmp.snmp.InPkts.increment();
@@ -170,11 +171,13 @@ public class Ukcp{
                 }
             }
         } else {
+            //再进去
             input(data, true,current);
         }
     }
 
     private void input(ByteBuf data, boolean regular,long current) throws IOException {
+        //最后是调用kcp的input方法
         int ret = kcp.input(data, regular,current);
         switch (ret) {
             case -1:
@@ -198,6 +201,7 @@ public class Ukcp{
      * @throws IOException
      */
     void send(ByteBuf buf) throws IOException {
+        //最终也是回到Kcp.send
         int ret = kcp.send(buf);
         logger.debug("6 转到kcp的发送函数 kcp.send(buf)现在是传送buf了");
         switch (ret) {
@@ -351,7 +355,9 @@ public class Ukcp{
                 return;
             }
         }
+        //这里，UKCP类有一个列表来接受这些数据
         this.readBuffer.offer(byteBuf);
+        //然后通过下面这个方法执行读的线程
         notifyReadEvent();
     }
 
@@ -377,8 +383,11 @@ public class Ukcp{
             }
         }
         byteBuf = byteBuf.retainedDuplicate();
+        //把数据给writeBuffer队列
         writeBuffer.offer(byteBuf);
         logger.debug("1  byteBuf成功来到  UKcp中的Queue<ByteBuf>");
+
+        //这个启动写线程
         notifyWriteEvent();
         return true;
     }

@@ -21,6 +21,7 @@ public class KcpOutPutImp implements KcpOutput {
         //Kcp里Object user,转换再给User类？？？
         User user = (User) kcp.getUser();
         //创建DatagramPacket对象，传入data、RemoteAddress、LocalAddress
+        //这里其实走完就把数据给Netty那边了，然后我学完
         DatagramPacket temp = new DatagramPacket(data,user.getRemoteAddress(), user.getLocalAddress());
         //public abstract class AbstractChannel extends DefaultAttributeMap implements Channel
         //把DatagramPacket给UDP发送

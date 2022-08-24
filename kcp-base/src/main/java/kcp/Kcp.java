@@ -28,7 +28,8 @@ public class Kcp implements IKcp {
     /**
      * no delay min rto
      */
-    public static final int IKCP_RTO_NDL = 30;
+    //public static final int IKCP_RTO_NDL = 30;
+    public static final int IKCP_RTO_NDL = 0;
 
     /**
      * normal min rto
@@ -77,7 +78,8 @@ public class Kcp implements IKcp {
 
     public static final int IKCP_MTU_DEF = 1400;
 
-    public static final int IKCP_INTERVAL = 100;
+    //public static final int IKCP_INTERVAL = 100;
+    public static final int IKCP_INTERVAL = 10;
 
     public int IKCP_OVERHEAD = 24;
 
@@ -222,6 +224,7 @@ public class Kcp implements IKcp {
         if (data.readableBytes() == 0) {
             return;
         }
+        //先生成output对象，然后这个对象里有out方法
         kcp.output.out(data, kcp);
         logger.debug("14 kcp.output.out(data, kcp)");
     }
@@ -408,6 +411,7 @@ public class Kcp implements IKcp {
      */
     @Override
     public int peekSize() {
+        //rcvQueue为空，返回-1
         if (rcvQueue.isEmpty()) {
             return -1;
         }
@@ -440,15 +444,19 @@ public class Kcp implements IKcp {
      */
     @Override
     public boolean canRecv() {
+        //假如kcp.rcvQueue是空的，返回false,意思就是不能接收
         if (rcvQueue.isEmpty()) {
             return false;
         }
 
+        //rcvQueue.peek()，得到list的头部元素
         Segment seg = rcvQueue.peek();
+        //第一个包是一条应用层消息的最后一个分包？一条消息只有一个包的情况？
         if (seg.frg == 0) {
             return true;
         }
 
+        //接收队列长度小于应用层消息分包数量？接收队列空间不够用于接收完整的一个消息？
         if (rcvQueue.size() < seg.frg + 1) { // Some segments have not arrived yet
             return false;
         }
@@ -514,6 +522,7 @@ public class Kcp implements IKcp {
             Segment seg = Segment.createSegment(buf.readRetainedSlice(size));
             logger.debug("4 Segment.createSegment(buf.readRetainedSlice(size))   存储在buf");
             seg.frg = (short) (stream ? 0 : count - i - 1);
+            //刚才的data变成seg再放到kcp的 sndQueue
             sndQueue.add(seg);
             logger.debug("5 seg再给到sndQueue   sndQueue.add(seg) ");
             len = buf.readableBytes();
@@ -685,6 +694,7 @@ public class Kcp implements IKcp {
         if (repeat) {
             newSeg.recycle(true);
         } else if (listItr == null) {
+            //把刚才的seg给添加rcvBuf的List里
             rcvBuf.add(newSeg);
         } else {
             if (findPos) {
@@ -693,6 +703,7 @@ public class Kcp implements IKcp {
             listItr.add(newSeg);
         }
 
+        //下面这个方法把数据从rcv_buf -> rcv_queue
         // move available data from rcv_buf -> rcv_queue
         moveRcvData(); // Invoke the method only if the segment is not repeat?
         return repeat;
@@ -700,10 +711,12 @@ public class Kcp implements IKcp {
 
 
     private void moveRcvData() {
+        //先从刚才的rcvBuf生成一个Iterator迭代器
         for (Iterator<Segment> itr = rcvBufItr.rewind(); itr.hasNext(); ) {
             Segment seg = itr.next();
             if (seg.sn == rcvNxt && rcvQueue.size() < rcvWnd) {
                 itr.remove();
+                //取一个就存到这个rcvQueue中，数据就处理好了
                 rcvQueue.add(seg);
                 rcvNxt++;
             } else {
@@ -815,6 +828,7 @@ public class Kcp implements IKcp {
                         ackPush(sn, ts);
                         if (itimediff(sn, rcvNxt) >= 0) {
                             if (len > 0) {
+                                //数据从data给到seg
                                 seg = Segment.createSegment(data.readRetainedSlice(len));
                                 readed = true;
                             } else {
@@ -938,6 +952,7 @@ public class Kcp implements IKcp {
         if(buffer==null)
             return;
         if (buffer.readableBytes() > reserved) {
+            //对，output开始发送 是的
             output(buffer, this);
             logger.debug("15 output(buffer, this);");
             return;
@@ -1087,6 +1102,7 @@ public class Kcp implements IKcp {
         int newSegsCount=0;
         // move data from snd_queue to snd_buf
         while (itimediff(sndNxt, sndUna + cwnd0) < 0) {
+            //从刚才的sndQueue拿出来
             Segment newSeg = sndQueue.poll();
             //推出sndQueue队列头部元素
             if (newSeg == null) {
@@ -1112,7 +1128,7 @@ public class Kcp implements IKcp {
         long minrto = interval;
 
 
-        //唯一解释sndBuf
+        //唯一解释sndBuf 这些都是原理 我看不董
         for (Iterator<Segment> itr = sndBufItr.rewind(); itr.hasNext();) {
             logger.debug("9 sndBufItr 数据给到 itr");
             Segment segment = itr.next();

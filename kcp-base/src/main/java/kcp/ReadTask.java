@@ -44,19 +44,21 @@ public class ReadTask implements ITask {
 
             //获取当时时间
             long current = System.currentTimeMillis();
-            //从ukcp获取ReadBuffer队列
+            //从ukcp获取ReadBuffer队列 这就是刚才存了数据的ReadBuffer
             Queue<ByteBuf> recieveList = ukcp.getReadBuffer();
 
             logger.error("2  从ukcp获取ReadBuffer队列");
 
             int readCount =0;
             for (; ; ) {
+                //取出队列的头元素，这个循环，全部取出来
                 ByteBuf byteBuf = recieveList.poll();
                 if (byteBuf == null) {
                     break;
                 }
                 readCount++;
                 //把队列里的每一个元素输入到ukcp中
+                //我们的目的是把数据最终给到app使用，然后这个设计是把数据存到KCP类里的Queue里，app要用就从KCP里调
                 ukcp.input(byteBuf, current);
                 byteBuf.release();
 
@@ -67,7 +69,8 @@ public class ReadTask implements ITask {
             }
 
             if(ukcp.isControlReadBufferSize()){
-                //这个逻辑不进去
+                //这个逻辑不进去    是不进去的 private int readBufferSize = -1不限制;
+                // 但是会有Cannot reserve 16777216 bytes 16MB of direct buffer memory
                 //控制readBufferSize   this.readBufferIncr.set(channelConfig.getReadBufferSize()/channelConfig.getMtu());
                 ukcp.getReadBufferIncr().addAndGet(readCount);
                 logger.error("0  ukcp.isControlReadBufferSize()");
@@ -93,8 +96,10 @@ public class ReadTask implements ITask {
             } else {
                 //这里给KcpListener通信用的，但是不知道为什么while(true)怎么出来
                 while (ukcp.canRecv()) {
+                    //下面的方法我的理解是为了统计数据量用的，就是我接收了多少数据
                     ByteBuf recvBuf = ukcp.mergeReceive();
                     readBytes += recvBuf.readableBytes();
+                    current = System.currentTimeMillis();
                     readBytebuf(recvBuf,current,ukcp);
                     logger.error("4  ukcp.canRecv()");
                 }

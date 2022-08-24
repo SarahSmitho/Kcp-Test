@@ -32,6 +32,7 @@ public class WriteTask implements ITask {
             }
             //之前是追数据，还没有执行数据 我们只是追数据往哪走 其实也一样了，只是有一个方法
             //从发送缓冲区到kcp缓冲区   ????
+            //从Queue拿出来
             Queue<ByteBuf> queue = ukcp.getWriteBuffer();
             logger.debug("2  从ukcp中的queue  Queue<ByteBuf> queue = ukcp.getWriteBuffer()");
             logger.error("2  从ukcp中的queue  Queue<ByteBuf> queue = ukcp.getWriteBuffer()");
@@ -49,7 +50,7 @@ public class WriteTask implements ITask {
                 writeCount++;
                 try {
                     writeBytes +=byteBuf.readableBytes();
-                    //这里
+                    //这里发送逻辑
                     ukcp.send(byteBuf);
                     logger.debug("7  ukcp的发送函数结束  ukcp.send(byteBuf)");
                     logger.error("7  ukcp的发送函数结束  ukcp.send(byteBuf)");

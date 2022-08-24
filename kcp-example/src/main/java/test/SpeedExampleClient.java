@@ -51,13 +51,15 @@ public class SpeedExampleClient implements KcpListener {
         //channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
         channelConfig.setWriteBufferSize(channelConfig.getMtu()*80000000);
 
+        //刚才的信道设置
         KcpClient kcpClient = new KcpClient();
         kcpClient.init(channelConfig);
         //Cannot reserve 16777216 bytes 16MB of direct buffer memory (allocated: 2063605861, limit: 2065694720)
 
         //127.0.0.1   192.168.3.184    公司电脑 192.168.3.217
         SpeedExampleClient speedExampleClient = new SpeedExampleClient();
-        kcpClient.connect(new InetSocketAddress("192.168.3.184",20004),channelConfig,speedExampleClient);
+        //IP、端口、信道设置、speedExampleClien还有这个对象
+        kcpClient.connect(new InetSocketAddress("192.168.3.217",20004),channelConfig,speedExampleClient);
 
     }
     private static final int messageSize = 2048;
@@ -66,6 +68,7 @@ public class SpeedExampleClient implements KcpListener {
     @Override
     public void onConnected(Ukcp ukcp) {
         //匿名内部类加Lambda表达式（把一些固定模式代码省略掉，适合熟悉的人）
+        //连接就开线程让他不停发消息
         new Thread(() -> {
             //while(true) 和for（;;）是一样的
             for(;;){
@@ -79,6 +82,7 @@ public class SpeedExampleClient implements KcpListener {
                 //Cannot reserve 16777216 bytes of direct buffer memory (allocated: 4244643941, limit: 4250927104)
                 //涉及到好多知识不管了
                 //messageSize为2048
+                //设置byteBuf大小
                 ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer(messageSize);
                 //Byte数组长度
                 //Byte[] bytes=new Byte[999999999];    这玩意阻塞耗资源
@@ -130,8 +134,10 @@ public class SpeedExampleClient implements KcpListener {
                     e.printStackTrace();
                 }*/
 
+                //写数据给byteBuf 这里 1秒我让打一次 是的
                 byteBuf.writeBytes(new byte[8000]);
                 logger.debug("0  开始往ukcp写入数据");
+                //开始把数据给kcp了，ukcp类只是一个设计的中介，最终调用的方法还是kcp的
                 if(!ukcp.write(byteBuf)){
                     try {
                         Thread.sleep(1000);

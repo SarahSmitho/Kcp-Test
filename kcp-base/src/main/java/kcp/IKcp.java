@@ -2,7 +2,6 @@ package kcp;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.util.Recycler;
 
 import java.util.List;
 
@@ -39,6 +38,7 @@ public interface IKcp {
 
     int send(ByteBuf buf);
 
+    //接口
     int input(ByteBuf data, boolean regular, long current);
 
     long currentMs(long now);
